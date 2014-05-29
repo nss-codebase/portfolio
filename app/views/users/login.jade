@@ -1,0 +1,9 @@
+extends ../shared/template
+
+block content
+  h1 Login
+
+  form(action='/login', method='post')
+    input(type='email', autofocus=true, placeholder='Email Address', name='email')
+    input(type='password', placeholder='Password', name='password')
+    button Login
