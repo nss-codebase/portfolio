@@ -11,6 +11,12 @@ exports.index = (req, res)=>{
   });
 };
 
+exports.sort = (req, res)=>{
+  Project.findAllByUserId(res.locals.user._id, projects=>{
+    res.render('projects/sort', {projects:projects, title: 'Portfolio: Sort'});
+  });
+};
+
 exports.new = (req, res)=>{
   res.render('projects/new', {title: 'Portfolio: New'});
 };
@@ -89,6 +95,20 @@ exports.setPrimary = (req, res)=>{
       project.setPrimary(req.params.name, ()=>res.redirect(`/projects/${project._id}`));
     }else{
       res.redirect('/projects');
+    }
+  });
+};
+
+exports.move = (req, res)=>{
+  Project.findById(req.params.id, project=>{
+    if(project.isOwner(res.locals.user)){
+      project.move(req.params.direction, ()=>{
+        Project.findAllByUserId(res.locals.user._id, projects=>{
+          res.render('projects/projects', {projects:projects});
+        });
+      });
+    }else{
+      res.send({});
     }
   });
 };

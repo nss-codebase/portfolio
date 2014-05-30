@@ -32,6 +32,7 @@ function load(app, fn){
 
   app.get('/projects', dbg, projects.index);
   app.get('/projects/new', dbg, projects.new);
+  app.get('/projects/sort', dbg, projects.sort);
   app.get('/projects/:id', dbg, projects.show);
 
   app.all('*', users.bounce);
@@ -43,6 +44,7 @@ function load(app, fn){
   app.post('/projects/:id/photos', dbg, projects.addPhoto);
   app.delete('/projects/:id/photos/:name', dbg, projects.delPhoto);
   app.put('/projects/:id/photos/:name', dbg, projects.setPrimary);
+  app.put('/projects/:id/move/:direction', dbg, projects.move);
 
   console.log('Routes Loaded');
   fn();

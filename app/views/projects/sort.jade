@@ -1,0 +1,14 @@
+extends ../shared/template
+
+block content
+  h1 Projects
+
+  #projects
+    each project in projects
+      .project(data-id=project._id.toString())
+        a.up(href='#') UP
+        a.dn(href='#') DN
+        h1: a(href='/projects/#{project._id}')= project.title
+
+block scripts
+  script(src='/js/es6/compiled/sort.js')

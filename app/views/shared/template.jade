@@ -15,10 +15,11 @@ html
         li: a(href='/contact') Contact
         li: a(href='/resume') Resume
         li: a(href='/login') Login
-        li: a(href='/projects') Portfolio
+        li: a(href='/projects') Projects
         if(user)
           li: a(href='/logout')= user.email
           li: a(href='/projects/new') New Project
+          li: a(href='/projects/sort') Sort Projects
 
     block content
 

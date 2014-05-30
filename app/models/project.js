@@ -21,6 +21,7 @@ class Project{
     project.app = fields.app[0].trim();
     project.date = new Date(fields.date[0]);
     project.userId = userId;
+    project.order = 0;
     project.photos = [];
     project.processPhotos(files.photos);
     projects.save(project, ()=>fn(project));
@@ -98,8 +99,19 @@ class Project{
     });
   }
 
+  move(direction, fn){
+    direction = direction === 'up' ? 1 : -1;
+    projects.update({_id:this._id}, {$set:{order:this.order+direction}}, fn);
+  }
+
   static findAll(fn){
-    projects.find().toArray((e,r)=>fn(r));
+    projects.find({}, {sort:[['order', -1]]}).toArray((e,r)=>fn(r));
+  }
+
+  static findAllByUserId(userId, fn){
+    projects.find({userId:userId}, {sort:[['order', -1]]}).toArray((e,r)=>{
+      fn(r);
+    });
   }
 
   static findById(projectId, fn){

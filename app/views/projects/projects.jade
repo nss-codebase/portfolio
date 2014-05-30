@@ -1,0 +1,5 @@
+each project in projects
+  .project(data-id=project._id.toString())
+    a.up(href='#') UP
+    a.dn(href='#') DN
+    h1: a(href='/projects/#{project._id}')= project.title
