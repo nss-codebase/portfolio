@@ -40,10 +40,33 @@ exports.destroy = (req, res)=>{
   });
 };
 
+exports.addPhoto = (req, res)=>{
+  Project.findById(req.params.id, project=>{
+    if(project.isOwner(res.locals.user)){
+      var form = new multiparty.Form();
+      form.parse(req, (err, fields, files)=>{
+        project.addPhoto(files.photos, ()=>res.redirect(`/projects/${project._id}`));
+      });
+    }else{
+      res.redirect('/projects');
+    }
+  });
+};
+
 exports.delPhoto = (req, res)=>{
   Project.findById(req.params.id, project=>{
     if(project.isOwner(res.locals.user)){
       project.delPhoto(req.params.name, ()=>res.redirect(`/projects/${project._id}`));
+    }else{
+      res.redirect('/projects');
+    }
+  });
+};
+
+exports.setPrimary = (req, res)=>{
+  Project.findById(req.params.id, project=>{
+    if(project.isOwner(res.locals.user)){
+      project.setPrimary(req.params.name, ()=>res.redirect(`/projects/${project._id}`));
     }else{
       res.redirect('/projects');
     }

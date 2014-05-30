@@ -6,6 +6,12 @@ block content
   .project
     h1: a(href='/projects/#{project._id}')= project.title
     h2 #{project.photos.length} Photos
+
+    if(user && project.isOwner(user))
+      form(action='/projects/#{project._id}/photos', method='post', enctype='multipart/form-data')
+        input(type='file', name='photos', multiple=true)
+        button Add More Photos
+
     #photos
       each photo in project.photos
         .photo(style='background-image:url("#{photo.file}")', class=photo.isPrimary ? 'primary' : '')

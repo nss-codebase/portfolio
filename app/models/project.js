@@ -27,7 +27,7 @@ class Project{
   }
 
   processPhotos(photos){
-    photos.forEach((p,i)=>{
+    photos.forEach(p=>{
       if(p.size){
         var name = crypto.randomBytes(12).toString('hex') + path.extname(p.originalFilename).toLowerCase();
         var file = `/img/${this.userId}/${this._id}/${name}`;
@@ -37,7 +37,7 @@ class Project{
         photo.file = file;
         photo.size = p.size;
         photo.orig = p.originalFilename;
-        photo.isPrimary = i === 0;
+        photo.isPrimary = false;
 
         var userDir = `${__dirname}/../static/img/${this.userId}`;
         var projDir = `${userDir}/${this._id}`;
@@ -68,10 +68,23 @@ class Project{
     });
   }
 
+  addPhoto(photos, fn){
+    this.processPhotos(photos);
+    projects.save(this, ()=>fn());
+  }
+
   delPhoto(name, fn){
-    projects.findAndModify({_id:this._id}, [], {$pull:{photos:{name:name}}}, (e,p)=>{
+    projects.update({_id:this._id}, {$pull:{photos:{name:name}}}, ()=>{
       fs.unlinkSync(`${this.projDir}/${name}`);
       fn();
+    });
+  }
+
+  setPrimary(name, fn){
+    projects.update({_id:this._id, 'photos.isPrimary':true}, {$set:{'photos.$.isPrimary':false}}, ()=>{
+      projects.update({_id:this._id, 'photos.name':name}, {$set:{'photos.$.isPrimary':true}}, ()=>{
+        fn();
+      });
     });
   }
 
