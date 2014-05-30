@@ -26,6 +26,14 @@ exports.lookup = (req, res, next)=>{
   });
 };
 
+exports.bounce = (req, res, next)=>{
+  if(res.locals.user){
+    next();
+  }else{
+    res.redirect('/');
+  }
+};
+
 exports.logout = (req, res)=>{
   req.session.userId = null;
   res.redirect('/');

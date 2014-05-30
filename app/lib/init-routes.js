@@ -31,9 +31,12 @@ function load(app, fn){
   app.get('/logout', dbg, users.logout);
 
   app.get('/projects', dbg, projects.index);
-  app.post('/projects', dbg, projects.create);
   app.get('/projects/new', dbg, projects.new);
   app.get('/projects/:id', dbg, projects.show);
+
+  app.all('*', users.bounce);
+
+  app.post('/projects', dbg, projects.create);
   app.delete('/projects/:id', dbg, projects.destroy);
   app.get('/projects/:id/edit', dbg, projects.edit);
   app.put('/projects/:id', dbg, projects.update);
