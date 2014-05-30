@@ -6,10 +6,14 @@ var projects = global.nss.db.collection('projects');
 var fs = require('fs');
 var path = require('path');
 var Mongo = require('mongodb');
+var _ = require('lodash');
+var rimraf = require('rimraf');
+var crypto = require('crypto');
 
 class Project{
   static create(userId, fields, files, fn){
     var project = new Project();
+    project._id = Mongo.ObjectID();
     project.title = fields.title[0].trim();
     project.description = fields.description[0].trim();
     project.tags = fields.tags[0].split(',').map(t=>t.toLowerCase()).map(t=>t.trim());
@@ -19,23 +23,55 @@ class Project{
     project.userId = userId;
     project.photos = [];
     project.processPhotos(files.photos);
-    projects.save(project, (e,p)=>fn(p));
+    projects.save(project, ()=>fn(project));
   }
 
   processPhotos(photos){
     photos.forEach((p,i)=>{
-      var title = this.title.toLowerCase().replace(/[^\w]/g, '');
-      var photo = `/img/${this.userId}/${title}/${i}${path.extname(p.originalFilename)}`;
-      this.photos.push(photo);
+      if(p.size){
+        var name = crypto.randomBytes(12).toString('hex') + path.extname(p.originalFilename).toLowerCase();
+        var file = `/img/${this.userId}/${this._id}/${name}`;
 
-      var userDir = `${__dirname}/../static/img/${this.userId}`;
-      var projDir = `${userDir}/${title}`;
-      var fullDir = `${projDir}/${i}${path.extname(p.originalFilename)}`;
+        var photo = {};
+        photo.name = name;
+        photo.file = file;
+        photo.size = p.size;
+        photo.orig = p.originalFilename;
+        photo.isPrimary = i === 0;
 
-      if(!fs.existsSync(userDir)){fs.mkdirSync(userDir);}
-      if(!fs.existsSync(projDir)){fs.mkdirSync(projDir);}
+        var userDir = `${__dirname}/../static/img/${this.userId}`;
+        var projDir = `${userDir}/${this._id}`;
+        var fullDir = `${projDir}/${name}`;
 
-      fs.renameSync(p.path, fullDir);
+        if(!fs.existsSync(userDir)){fs.mkdirSync(userDir);}
+        if(!fs.existsSync(projDir)){fs.mkdirSync(projDir);}
+
+        fs.renameSync(p.path, fullDir);
+
+        this.projDir = path.normalize(projDir);
+        this.photos.push(photo);
+      }
+    });
+  }
+
+  isOwner(user){
+    return user._id.toString() === this.userId.toString();
+  }
+
+  destroy(fn){
+    projects.findAndRemove({_id:this._id}, ()=>{
+      if(this.projDir){
+        rimraf(this.projDir, fn);
+      }else{
+        fn();
+      }
+    });
+  }
+
+  delPhoto(name, fn){
+    projects.findAndModify({_id:this._id}, [], {$pull:{photos:{name:name}}}, (e,p)=>{
+      fs.unlinkSync(`${this.projDir}/${name}`);
+      fn();
     });
   }
 
@@ -45,7 +81,10 @@ class Project{
 
   static findById(projectId, fn){
     projectId = Mongo.ObjectID(projectId);
-    projects.findOne({_id:projectId}, (e,p)=>fn(p));
+    projects.findOne({_id:projectId}, (e,p)=>{
+      p = _.create(Project.prototype, p);
+      fn(p);
+    });
   }
 }
 

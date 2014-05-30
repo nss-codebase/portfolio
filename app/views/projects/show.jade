@@ -6,9 +6,27 @@ block content
   .project
     h1: a(href='/projects/#{project._id}')= project.title
     h2 #{project.photos.length} Photos
+    #photos
+      each photo in project.photos
+        .photo(style='background-image:url("#{photo.file}")', class=photo.isPrimary ? 'primary' : '')
+          if(user && project.isOwner(user))
+            form(action='/projects/#{project._id}/photos/#{photo.name}', method='post')
+              input(type='hidden', name='_method', value='delete')
+              button Delete
+            if(!photo.isPrimary)
+              form(action='/projects/#{project._id}/photos/#{photo.name}', method='post')
+                input(type='hidden', name='_method', value='put')
+                button Make Primary
+
     h2= project.description
     h2= project.date
     h2= project.tags
     ul
       li: a(href=project.git) Github
       li: a(href=project.app) Amazon EC2
+
+      if(user && project.isOwner(user))
+        li
+          form(action='/projects/#{project._id}', method='post')
+            input(type='hidden', name='_method', value='delete')
+            button Delete
