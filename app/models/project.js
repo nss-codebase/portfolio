@@ -26,6 +26,16 @@ class Project{
     projects.save(project, ()=>fn(project));
   }
 
+  update(obj, fn){
+    this.title = obj.title.trim();
+    this.description = obj.description.trim();
+    this.tags = obj.tags.split(',').map(t=>t.toLowerCase()).map(t=>t.trim());
+    this.git = obj.git.trim();
+    this.app = obj.app.trim();
+    this.date = new Date(obj.date);
+    projects.save(this, ()=>fn());
+  }
+
   processPhotos(photos){
     photos.forEach(p=>{
       if(p.size){

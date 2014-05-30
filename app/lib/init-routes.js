@@ -35,6 +35,8 @@ function load(app, fn){
   app.get('/projects/new', dbg, projects.new);
   app.get('/projects/:id', dbg, projects.show);
   app.delete('/projects/:id', dbg, projects.destroy);
+  app.get('/projects/:id/edit', dbg, projects.edit);
+  app.put('/projects/:id', dbg, projects.update);
   app.post('/projects/:id/photos', dbg, projects.addPhoto);
   app.delete('/projects/:id/photos/:name', dbg, projects.delPhoto);
   app.put('/projects/:id/photos/:name', dbg, projects.setPrimary);

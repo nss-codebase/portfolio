@@ -3,6 +3,7 @@
 var multiparty = require('multiparty');
 var traceur = require('traceur');
 var Project = traceur.require(__dirname + '/../models/project.js');
+var moment = require('moment');
 
 exports.index = (req, res)=>{
   Project.findAll(projects=>{
@@ -16,7 +17,6 @@ exports.new = (req, res)=>{
 
 exports.create = (req, res)=>{
   var form = new multiparty.Form();
-
   form.parse(req, (err, fields, files)=>{
     Project.create(res.locals.user._id, fields, files, (p)=>{
       res.redirect('/projects/' + p._id);
@@ -34,6 +34,26 @@ exports.destroy = (req, res)=>{
   Project.findById(req.params.id, project=>{
     if(project.isOwner(res.locals.user)){
       project.destroy(()=>res.redirect('/projects'));
+    }else{
+      res.redirect('/projects');
+    }
+  });
+};
+
+exports.edit = (req, res)=>{
+  Project.findById(req.params.id, project=>{
+    if(project.isOwner(res.locals.user)){
+      res.render('projects/edit', {moment:moment, project:project, title: 'Portfolio: Edit'});
+    }else{
+      res.redirect('/projects');
+    }
+  });
+};
+
+exports.update = (req, res)=>{
+  Project.findById(req.params.id, project=>{
+    if(project.isOwner(res.locals.user)){
+      project.update(req.body, ()=>res.redirect(`/projects/${project._id}`));
     }else{
       res.redirect('/projects');
     }
